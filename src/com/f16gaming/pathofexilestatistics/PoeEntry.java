@@ -43,6 +43,7 @@ import org.json.JSONTokener;
 public class PoeEntry {
     private final String toStringFormat = "#%03d: %s (%d)";
 
+    private String account;
     private int rank;
     private String name;
     private int level;
@@ -50,7 +51,8 @@ public class PoeEntry {
     private String className;
     private long experience;
 
-    public PoeEntry(int rank, String name, int level, boolean online, String className, long experience) {
+    public PoeEntry(String account, int rank, String name, int level, boolean online, String className, long experience) {
+        this.account = account;
         this.rank = rank;
         this.name = name;
         this.level = level;
@@ -67,6 +69,7 @@ public class PoeEntry {
         PoeEntry[] result = new PoeEntry[length];
         for (int i = 0; i < length; i++) {
             JSONObject entry = entries.getJSONObject(i);
+            String account = entry.getJSONObject("account").getString("name");
             int rank = entry.getInt("rank");
             JSONObject character = entry.getJSONObject("character");
             String name = character.getString("name");
@@ -74,10 +77,14 @@ public class PoeEntry {
             boolean online = entry.getBoolean("online");
             String className = character.getString("class");
             long experience = character.getLong("experience");
-            PoeEntry poeEntry = new PoeEntry(rank, name, level, online, className, experience);
+            PoeEntry poeEntry = new PoeEntry(account, rank, name, level, online, className, experience);
             result[i] = poeEntry;
         }
         return result;
+    }
+
+    public String getAccount() {
+        return account;
     }
 
     public int getRank() {
@@ -104,16 +111,46 @@ public class PoeEntry {
         return experience;
     }
 
+    public String getShortExpString() {
+        float exp = experience;
+
+        final String[] types =
+        {
+            "",  //  999
+            "K", //   1K
+            "M", //   1M
+            "B"  //   1B
+        };
+
+        int order = 0;
+
+        while (exp >= 1000 && order + 1 < types.length) {
+            order++;
+            exp /= 1000;
+        }
+
+        String expString = String.format("%.2f", exp);
+        if (expString.length() > 5) {
+            expString = expString.substring(0, 4);
+            if (expString.charAt(expString.length() - 1) == '.')
+                expString = expString.substring(0, 3);
+        }
+
+        return String.format("%s%s", expString, types[order]);
+    }
+
     public AlertDialog getInfoDialog(Activity activity, Resources res) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         LayoutInflater inflater = activity.getLayoutInflater();
         View view = inflater.inflate(R.layout.info, null);
         String nameFormat = res.getString(R.string.info_name);
+        String accountFormat = res.getString(R.string.info_account);
         String rankFormat = res.getString(R.string.info_rank);
         String levelFormat = res.getString(R.string.info_level);
         String classFormat = res.getString(R.string.info_class);
         String experienceFormat = res.getString(R.string.info_experience);
         ((TextView) view.findViewById(R.id.info_name)).setText(String.format(nameFormat, name));
+        ((TextView) view.findViewById(R.id.info_account)).setText(String.format(accountFormat, account));
         ((TextView) view.findViewById(R.id.info_rank)).setText(String.format(rankFormat, rank));
         ((TextView) view.findViewById(R.id.info_level)).setText(String.format(levelFormat, level));
         ((TextView) view.findViewById(R.id.info_class)).setText(String.format(classFormat, className));

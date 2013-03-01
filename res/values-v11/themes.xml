@@ -21,7 +21,7 @@
   -->
 
 <resources>
-    <style name="MainTheme" parent="@android:style/Theme.Black.NoTitleBar">
+    <style name="MainTheme" parent="@android:style/Theme.Black">
 
     </style>
 </resources>

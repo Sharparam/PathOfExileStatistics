@@ -41,10 +41,12 @@ import java.io.ByteArrayOutputStream;
 public class RetrieveStatsTask extends AsyncTask<String, Void, StatsResponse> {
     private RetrieveStatsListener listener;
     private boolean hardcore;
+    private boolean refresh;
 
-    public RetrieveStatsTask(RetrieveStatsListener listener, boolean hardcore) {
+    public RetrieveStatsTask(RetrieveStatsListener listener, boolean hardcore, boolean refresh) {
         this.listener = listener;
         this.hardcore = hardcore;
+        this.refresh = refresh;
     }
 
     @Override
@@ -58,6 +60,7 @@ public class RetrieveStatsTask extends AsyncTask<String, Void, StatsResponse> {
             if (status.getStatusCode() == HttpStatus.SC_OK) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 response.getEntity().writeTo(out);
+
                 out.close();
                 String responseString = out.toString();
                 statsResponse = new StatsResponse(status, responseString);
@@ -72,6 +75,6 @@ public class RetrieveStatsTask extends AsyncTask<String, Void, StatsResponse> {
 
     @Override
     protected void onPostExecute(StatsResponse response) {
-        listener.handleResponse(response, hardcore);
+        listener.handleResponse(response, hardcore, refresh);
     }
 }

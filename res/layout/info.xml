@@ -21,47 +21,68 @@
   ~ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/info_scrollView"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
-    <TextView android:id="@+id/info_name"
+    android:layout_height="fill_parent">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/info_name"
-        android:textSize="@dimen/info_textsize"
-        android:paddingLeft="5dp" />
-    <TextView android:id="@+id/info_rank"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/info_rank"
-        android:textSize="@dimen/info_textsize"
-        android:paddingLeft="5dp" />
-    <TextView android:id="@+id/info_level"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/info_level"
-        android:textSize="@dimen/info_textsize"
-        android:paddingLeft="5dp" />
-    <TextView android:id="@+id/info_class"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/info_class"
-        android:textSize="@dimen/info_textsize"
-        android:paddingLeft="5dp" />
-    <TextView android:id="@+id/info_experience"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/info_experience"
-        android:textSize="@dimen/info_textsize"
-        android:paddingLeft="5dp" />
-    <TextView android:id="@+id/info_status"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/online"
-        android:textSize="@dimen/info_status"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:textColor="@color/online"
-        android:paddingBottom="5dp" />
-</LinearLayout>
+        android:scrollbars="vertical">
+        <TextView
+            android:id="@+id/info_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/info_name"
+            android:textSize="@dimen/info_textsize"
+            android:paddingLeft="@dimen/info_padding" />
+        <TextView
+            android:id="@+id/info_account"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/info_account"
+            android:textSize="@dimen/info_textsize"
+            android:paddingLeft="@dimen/info_padding" />
+        <TextView
+            android:id="@+id/info_rank"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/info_rank"
+            android:textSize="@dimen/info_textsize"
+            android:paddingLeft="@dimen/info_padding" />
+        <TextView
+            android:id="@+id/info_level"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/info_level"
+            android:textSize="@dimen/info_textsize"
+            android:paddingLeft="@dimen/info_padding" />
+        <TextView
+            android:id="@+id/info_class"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/info_class"
+            android:textSize="@dimen/info_textsize"
+            android:paddingLeft="5dp" />
+        <TextView
+            android:id="@+id/info_experience"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/info_experience"
+            android:textSize="@dimen/info_textsize"
+            android:paddingLeft="@dimen/info_padding" />
+        <TextView
+            android:id="@+id/info_status"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/online"
+            android:textSize="@dimen/info_status"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/online"
+            android:paddingBottom="@dimen/info_padding" />
+    </LinearLayout>
+</ScrollView>

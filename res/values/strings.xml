@@ -34,4 +34,18 @@
     <string name="info_experience">Experience: %,d</string>
     <string name="placeholder">PLACEHOLDER</string>
     <string name="update">Update</string>
+    <string name="header_rank">#</string>
+    <string name="header_name">Name</string>
+    <string name="header_level">Lvl</string>
+    <string name="header_class">Class</string>
+    <string name="header_experience">XP</string>
+    <string name="info_account">Account: %s</string>
+    <string name="list_footer">Load more entries…</string>
+    <string name="list_header">Tap to refresh…</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_hardcore">Show Hardcore</string>
+    <string name="menu_normal">Show Normal</string>
+    <string name="hardcore">Hardcore</string>
+    <string name="normal">Normal</string>
+    <string name="menu_reset">Reset</string>
 </resources>
