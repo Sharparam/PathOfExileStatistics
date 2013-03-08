@@ -42,11 +42,13 @@ public class RetrieveStatsTask extends AsyncTask<String, Void, StatsResponse> {
     private RetrieveStatsListener listener;
     private boolean hardcore;
     private boolean refresh;
+    private boolean jump;
 
-    public RetrieveStatsTask(RetrieveStatsListener listener, boolean hardcore, boolean refresh) {
+    public RetrieveStatsTask(RetrieveStatsListener listener, boolean hardcore, boolean refresh, boolean jump) {
         this.listener = listener;
         this.hardcore = hardcore;
         this.refresh = refresh;
+        this.jump = jump;
     }
 
     @Override
@@ -75,6 +77,6 @@ public class RetrieveStatsTask extends AsyncTask<String, Void, StatsResponse> {
 
     @Override
     protected void onPostExecute(StatsResponse response) {
-        listener.handleResponse(response, hardcore, refresh);
+        listener.handleResponse(response, hardcore, refresh, jump);
     }
 }

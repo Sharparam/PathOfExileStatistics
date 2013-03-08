@@ -28,6 +28,11 @@
         android:icon="@drawable/ic_menu_refresh"
         android:showAsAction="ifRoom" />
     <item
+        android:id="@+id/menu_search"
+        android:title="@string/menu_search"
+        android:icon="@drawable/ic_menu_search"
+        android:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_reset"
         android:title="@string/menu_reset"
         android:showAsAction="ifRoom" />

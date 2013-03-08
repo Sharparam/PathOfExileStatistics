@@ -22,6 +22,6 @@
 
 <resources>
     <style name="MainTheme" parent="@android:style/Theme">
-
+        <item name="numberPickerStyle">@style/NPWidget.Holo.Light.NumberPicker</item>
     </style>
 </resources>

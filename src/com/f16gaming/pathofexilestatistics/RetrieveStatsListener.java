@@ -29,5 +29,5 @@ package com.f16gaming.pathofexilestatistics;
  * To change this template use File | Settings | File Templates.
  */
 public interface RetrieveStatsListener {
-    void handleResponse(StatsResponse response, boolean hardcore, boolean refresh);
+    void handleResponse(StatsResponse response, boolean hardcore, boolean refresh, boolean jump);
 }

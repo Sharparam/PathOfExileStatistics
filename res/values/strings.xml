@@ -48,4 +48,7 @@
     <string name="hardcore">Hardcore</string>
     <string name="normal">Normal</string>
     <string name="menu_reset">Reset</string>
+    <string name="menu_search">Go to rank</string>
+    <string name="go">Go</string>
+    <string name="rank_go_dialog_title">Go to rank #</string>
 </resources>

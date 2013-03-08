@@ -24,12 +24,12 @@ package com.f16gaming.pathofexilestatistics;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.res.Resources;
-import android.database.MatrixCursor;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
+import net.simonvt.numberpicker.NumberPicker;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.json.JSONException;
@@ -52,6 +52,7 @@ public class MainActivity extends Activity {
     private final int max = 15000;
 
     private ProgressDialog progressDialog;
+    private AlertDialog rankGoDialog;
     private CharSequence progressDialogText;
 
     private ListView statsView;
@@ -70,11 +71,13 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.main);
 
+        LayoutInflater inflater = getLayoutInflater();
+
         poeEntries = new ArrayList<PoeEntry>();
 
         statsView = (ListView) findViewById(R.id.statsView);
 
-        listFooter = getLayoutInflater().inflate(R.layout.list_footer, null);
+        listFooter = inflater.inflate(R.layout.list_footer, null);
 
         statsView.addFooterView(listFooter);
 
@@ -84,6 +87,35 @@ public class MainActivity extends Activity {
                 onStatsViewClick(position);
             }
         });
+
+        AlertDialog.Builder rankGoBuilder = new AlertDialog.Builder(this);
+        View view = inflater.inflate(R.layout.rank_go_dialog, null);
+
+        net.simonvt.numberpicker.NumberPicker numberPicker = (net.simonvt.numberpicker.NumberPicker) view.findViewById(R.id.number_picker);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(max);
+
+        rankGoBuilder.setTitle(R.string.rank_go_dialog_title)
+                     .setView(view)
+                     .setCancelable(true)
+                     .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                         @Override
+                         public void onCancel(DialogInterface dialogInterface) {
+
+                         }
+                     })
+                     .setPositiveButton(R.string.go, new DialogInterface.OnClickListener() {
+                         @Override
+                         public void onClick(DialogInterface dialogInterface, int i) {
+                             int rawOffset = ((net.simonvt.numberpicker.NumberPicker) rankGoDialog.findViewById(R.id.number_picker)).getValue() - 1;
+                             if (rawOffset >= limit * offset && rawOffset <= limit + limit * offset)
+                                 showToast(String.format("Rank #%d is already showing", rawOffset + 1));
+                             else
+                                updateList(showHardcore, false, rawOffset);
+                         }
+                     });
+
+        rankGoDialog = rankGoBuilder.create();
 
         offset = -1;
         updateList(showHardcore);
@@ -108,8 +140,10 @@ public class MainActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-                refreshOffset = 0;
-                updateList(showHardcore, true);
+                refreshList();
+                return true;
+            case R.id.menu_search:
+                rankGoDialog.show();
                 return true;
             case R.id.menu_reset:
                 offset = -1;
@@ -152,15 +186,26 @@ public class MainActivity extends Activity {
         progressDialog = null;
     }
 
+    private void refreshList() {
+        refreshOffset = 0;
+        updateList(showHardcore, true);
+    }
+
     private void updateList(boolean hardcore) {
         updateList(hardcore, false);
     }
 
     private void updateList(boolean hardcore, boolean refresh) {
+        updateList(hardcore, refresh, 0);
+    }
+
+    private void updateList(boolean hardcore, boolean refresh, int rawOffset) {
         if (hardcore != showHardcore)
             offset = 0;
-        else if (!refresh)
+        else if (!refresh && rawOffset == 0)
             offset++;
+        else if (rawOffset > 0) // Calculate actual offset
+            offset = (int) Math.floor((double) rawOffset / (double) limit);
 
         if (refresh)
             showProgress("Refreshing", "Refreshing data (%d/%d)...", refreshOffset + 1, offset + 1);
@@ -172,13 +217,13 @@ public class MainActivity extends Activity {
                 : String.format(statsUrl, league, limit * offset, limit);
         new RetrieveStatsTask(new RetrieveStatsListener() {
             @Override
-            public void handleResponse(StatsResponse response, boolean hardcore, boolean refresh) {
-                updateList(response, hardcore, refresh);
+            public void handleResponse(StatsResponse response, boolean hardcore, boolean refresh, boolean jump) {
+                updateList(response, hardcore, refresh, jump);
             }
-        }, hardcore, refresh).execute(url);
+        }, hardcore, refresh, rawOffset > 0).execute(url);
     }
 
-    private void updateList(StatsResponse response, boolean hardcore, boolean refresh) {
+    private void updateList(StatsResponse response, boolean hardcore, boolean refresh, boolean jump) {
         if (response == null) {
             showToast("Failed to retrieve PoE stats data!");
             hideProgress();
@@ -191,7 +236,7 @@ public class MainActivity extends Activity {
                 String responseString = response.getResponseString();
                 PoeEntry[] newEntries = PoeEntry.getEntriesFromJSONString(responseString);
 
-                if (hardcore != showHardcore || (refresh && refreshOffset == 0))
+                if (hardcore != showHardcore || (refresh && refreshOffset == 0) || jump)
                     poeEntries.clear();
 
                 Collections.addAll(poeEntries, newEntries);
