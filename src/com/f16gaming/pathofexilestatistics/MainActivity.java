@@ -98,10 +98,10 @@ public class MainActivity extends Activity {
         rankGoBuilder.setTitle(R.string.rank_go_dialog_title)
                      .setView(view)
                      .setCancelable(true)
-                     .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                     .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                          @Override
-                         public void onCancel(DialogInterface dialogInterface) {
-
+                         public void onClick(DialogInterface dialogInterface, int i) {
+                             // Do nothing
                          }
                      })
                      .setPositiveButton(R.string.go, new DialogInterface.OnClickListener() {
@@ -111,14 +111,13 @@ public class MainActivity extends Activity {
                              if (rawOffset >= limit * offset && rawOffset <= limit + limit * offset)
                                  showToast(String.format("Rank #%d is already showing", rawOffset + 1));
                              else
-                                updateList(showHardcore, false, rawOffset);
+                                 updateList(showHardcore, false, rawOffset);
                          }
                      });
 
         rankGoDialog = rankGoBuilder.create();
 
-        offset = -1;
-        updateList(showHardcore);
+        resetList();
     }
 
     @Override
@@ -146,10 +145,9 @@ public class MainActivity extends Activity {
                 rankGoDialog.show();
                 return true;
             case R.id.menu_reset:
-                offset = -1;
-                updateList(showHardcore);
+                resetList();
             case R.id.menu_toggle:
-                updateList(!showHardcore);
+                toggleList();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -186,6 +184,15 @@ public class MainActivity extends Activity {
         progressDialog = null;
     }
 
+    private void resetList() {
+        offset = -1;
+        updateList(showHardcore);
+    }
+
+    private void toggleList() {
+        updateList(!showHardcore);
+    }
+
     private void refreshList() {
         refreshOffset = 0;
         updateList(showHardcore, true);
@@ -200,9 +207,9 @@ public class MainActivity extends Activity {
     }
 
     private void updateList(boolean hardcore, boolean refresh, int rawOffset) {
-        if (hardcore != showHardcore)
+        if (hardcore != showHardcore) // Switching mode
             offset = 0;
-        else if (!refresh && rawOffset == 0)
+        else if (!refresh && rawOffset == 0) // Not refreshing or jumping, load more entries
             offset++;
         else if (rawOffset > 0) // Calculate actual offset
             offset = (int) Math.floor((double) rawOffset / (double) limit);
@@ -211,20 +218,28 @@ public class MainActivity extends Activity {
             showProgress("Refreshing", "Refreshing data (%d/%d)...", refreshOffset + 1, offset + 1);
         else
             showProgress("Retrieving stats data...");
+
+        // Get the league we want to load from
         String league = hardcore ? hardcoreLeague : normalLeague;
+
+        // Construct proper URL
+        // Refreshes start at 0 then build up to offset var, hence the separate refreshOffset var
         String url = refresh ?
                 String.format(statsUrl, league, limit * refreshOffset, limit)
                 : String.format(statsUrl, league, limit * offset, limit);
+
+        // Create the task object to handle our request
         new RetrieveStatsTask(new RetrieveStatsListener() {
             @Override
             public void handleResponse(StatsResponse response, boolean hardcore, boolean refresh, boolean jump) {
                 updateList(response, hardcore, refresh, jump);
             }
-        }, hardcore, refresh, rawOffset > 0).execute(url);
+        }, hardcore, refresh, rawOffset > 0).execute(url); // And execute it!
     }
 
     private void updateList(StatsResponse response, boolean hardcore, boolean refresh, boolean jump) {
         if (response == null) {
+            // Something went wrong and we didn't even get a response body
             showToast("Failed to retrieve PoE stats data!");
             hideProgress();
             return;
@@ -232,46 +247,65 @@ public class MainActivity extends Activity {
 
         try {
             StatusLine status = response.getStatus();
+            // Should probably make this handle status codes listed on PoE API
             if (status.getStatusCode() == HttpStatus.SC_OK) {
                 String responseString = response.getResponseString();
                 PoeEntry[] newEntries = PoeEntry.getEntriesFromJSONString(responseString);
 
+                // This was a mode switch, refresh or jump; clear the previous entries
                 if (hardcore != showHardcore || (refresh && refreshOffset == 0) || jump)
                     poeEntries.clear();
 
+                // Add the newly loaded entries
                 Collections.addAll(poeEntries, newEntries);
 
+                // Continue loading entries if this is a refresh and it's not done yet
                 if (refresh && refreshOffset < offset) {
                     refreshOffset++;
                     updateList(hardcore, true);
                     return;
                 }
 
+                // If adapter var is null, this is the first updateList execution
                 if (adapter == null) {
                     adapter = new EntryAdapter(this, poeEntries, this, getResources());
                     statsView.setAdapter(adapter);
-                } else {
+                } else { // Otherwise just notify it that data has changed
                     adapter.notifyDataSetChanged();
                 }
 
+                // Show a toast to the user telling them the data is updated
                 showToast(String.format("%s stats updated", hardcore ? "Hardcore" : "Normal"));
+
+                // Remove the "Load more entries" at bottom of list if we reached the maximum
                 if (hardcore == showHardcore && limit + limit * offset >= max)
                     statsView.removeFooterView(listFooter);
                 else if (hardcore != showHardcore)
                 {
+                    // Otherwise add it back if it's not there
                     if (statsView.getFooterViewsCount() == 0)
                         statsView.addFooterView(listFooter);
                     statsView.setSelection(0);
                 }
+
+                // Update the showHardcore var to reflect new value
                 showHardcore = hardcore;
+
+                // Update title to new mode
                 setTitle(showHardcore ? R.string.hardcore : R.string.normal);
+
+                // Invalidate the options menu to update the text properly
+                // (This is only needed and supported on SDK level >= 11, since older versions
+                // always update the menu every time it's shown
                 if (Build.VERSION.SDK_INT >= 11)
                     invalidateOptionsMenu();
             } else {
                 showToast("Failed to retrieve PoE stats data!");
             }
-        } catch (JSONException e) {
+        } catch (JSONException e) { // Invalid JSON returned
             showToast("Error while parsing JSON data");
+        } catch (ClassCastException e) { // Usually indicative of a JSON parsing error
+            showToast("Failed to retrieve PoE stats data!");
         }
 
         hideProgress();
