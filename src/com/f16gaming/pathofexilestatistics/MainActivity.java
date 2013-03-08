@@ -146,6 +146,7 @@ public class MainActivity extends Activity {
                 return true;
             case R.id.menu_reset:
                 resetList();
+                return true;
             case R.id.menu_toggle:
                 toggleList();
                 return true;
@@ -253,7 +254,8 @@ public class MainActivity extends Activity {
                 PoeEntry[] newEntries = PoeEntry.getEntriesFromJSONString(responseString);
 
                 // This was a mode switch, refresh or jump; clear the previous entries
-                if (hardcore != showHardcore || (refresh && refreshOffset == 0) || jump)
+                // We also clear it if the offset is 0 (first execution or list reset)
+                if (offset == 0 || hardcore != showHardcore || (refresh && refreshOffset == 0) || jump)
                     poeEntries.clear();
 
                 // Add the newly loaded entries
