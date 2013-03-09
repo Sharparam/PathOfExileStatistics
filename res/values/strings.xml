@@ -51,4 +51,10 @@
     <string name="menu_search">Go to rank</string>
     <string name="go">Go</string>
     <string name="rank_go_dialog_title">Go to rank #</string>
+    <string name="refresh_warning">Refresh</string>
+    <string name="refresh_warning_message">You are refreshing a lot of entries, please confirm that you want to refresh
+        %d entries, or choose to reset the list.
+    </string>
+    <string name="refresh_warning_reset">Reset List</string>
+    <string name="refresh_warning_confirm">Confirm Refresh</string>
 </resources>

@@ -52,8 +52,9 @@ public class MainActivity extends Activity {
     private final int max = 15000;
 
     private ProgressDialog progressDialog;
+    private AlertDialog refreshWarningDialog;
     private AlertDialog rankGoDialog;
-    private CharSequence progressDialogText;
+    private NumberPicker numberPicker;
 
     private ListView statsView;
     private View listFooter;
@@ -61,9 +62,11 @@ public class MainActivity extends Activity {
     private int offset = 0; // Num entries to load = limit + limit * offset
     private boolean showHardcore = false;
     private int refreshOffset = 0; // Current refresh offset
+    private int refreshTopOffset = 0; // Cached top offset for refresh
 
     private ArrayList<PoeEntry> poeEntries;
     private EntryAdapter adapter;
+    private int refreshWarningLimit = 600; // Show warning if user tries to refresh more than this amount of entries
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,10 +91,29 @@ public class MainActivity extends Activity {
             }
         });
 
+        AlertDialog.Builder refreshWarningBuilder = new AlertDialog.Builder(this);
+        refreshWarningBuilder.setTitle(R.string.refresh_warning)
+                             .setMessage(R.string.refresh_warning_message)
+                             .setCancelable(true)
+                             .setNegativeButton(R.string.refresh_warning_reset, new DialogInterface.OnClickListener() {
+                                 @Override
+                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                     resetList();
+                                 }
+                             })
+                             .setPositiveButton(R.string.refresh_warning_confirm, new DialogInterface.OnClickListener() {
+                                 @Override
+                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                     refreshList(true);
+                                 }
+                             });
+
+        refreshWarningDialog = refreshWarningBuilder.create();
+
         AlertDialog.Builder rankGoBuilder = new AlertDialog.Builder(this);
         View view = inflater.inflate(R.layout.rank_go_dialog, null);
 
-        net.simonvt.numberpicker.NumberPicker numberPicker = (net.simonvt.numberpicker.NumberPicker) view.findViewById(R.id.number_picker);
+        numberPicker = (net.simonvt.numberpicker.NumberPicker) view.findViewById(R.id.number_picker);
         numberPicker.setMinValue(1);
         numberPicker.setMaxValue(max);
 
@@ -107,7 +129,7 @@ public class MainActivity extends Activity {
                      .setPositiveButton(R.string.go, new DialogInterface.OnClickListener() {
                          @Override
                          public void onClick(DialogInterface dialogInterface, int i) {
-                             int rawOffset = ((net.simonvt.numberpicker.NumberPicker) rankGoDialog.findViewById(R.id.number_picker)).getValue() - 1;
+                             int rawOffset = numberPicker.getValue() - 1;
                              if (rawOffset >= limit * offset && rawOffset <= limit + limit * offset)
                                  showToast(String.format("Rank #%d is already showing", rawOffset + 1));
                              else
@@ -155,6 +177,22 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Gets the list offset relative to list start entry.
+     * @return The zero-based offset relative to the start entry on the list.
+     */
+    private int getRelativeOffset() {
+        return (int) Math.floor((double) poeEntries.size() / (double) limit) - 1;
+    }
+
+    /**
+     * Gets the offset of the top list entry.
+     * @return The zero-based offset value for the top entry on the list.
+     */
+    private int getTopOffset() {
+        return offset - getRelativeOffset();
+    }
+
     private void showToast(CharSequence text) {
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }
@@ -170,8 +208,7 @@ public class MainActivity extends Activity {
             return;
         }
 
-        progressDialogText = text;
-        progressDialog = ProgressDialog.show(this, title, progressDialogText, true, false);
+        progressDialog = ProgressDialog.show(this, title, text, true, false);
     }
 
     private void showProgress(CharSequence title, String format, Object... args) {
@@ -195,8 +232,24 @@ public class MainActivity extends Activity {
     }
 
     private void refreshList() {
-        refreshOffset = 0;
-        updateList(showHardcore, true);
+        if (poeEntries.size() > refreshWarningLimit)
+        {
+            String message = getResources().getString(R.string.refresh_warning_message);
+            refreshWarningDialog.setMessage(String.format(message, poeEntries.size()));
+            refreshWarningDialog.show();
+        } else
+            refreshList(true);
+    }
+
+    private void refreshList(boolean confirmed) {
+        if (!confirmed)
+            return;
+
+        // Get the offset we need to start loading from when refreshing
+        // (Current offset subtracted with the number of offsets previously loaded)
+        refreshOffset = getTopOffset();
+        refreshTopOffset = getTopOffset();
+        updateList(showHardcore,  true);
     }
 
     private void updateList(boolean hardcore) {
@@ -216,7 +269,7 @@ public class MainActivity extends Activity {
             offset = (int) Math.floor((double) rawOffset / (double) limit);
 
         if (refresh)
-            showProgress("Refreshing", "Refreshing data (%d/%d)...", refreshOffset + 1, offset + 1);
+            showProgress("Refreshing", "Refreshing data (Page %d/%d)...", refreshOffset + 1, offset + 1);
         else
             showProgress("Retrieving stats data...");
 
@@ -255,7 +308,7 @@ public class MainActivity extends Activity {
 
                 // This was a mode switch, refresh or jump; clear the previous entries
                 // We also clear it if the offset is 0 (first execution or list reset)
-                if (offset == 0 || hardcore != showHardcore || (refresh && refreshOffset == 0) || jump)
+                if (offset == 0 || hardcore != showHardcore || (refresh && refreshOffset == refreshTopOffset) || jump)
                     poeEntries.clear();
 
                 // Add the newly loaded entries
@@ -311,6 +364,8 @@ public class MainActivity extends Activity {
         }
 
         hideProgress();
+
+        statsView.setSelection(poeEntries.size() - 1);
     }
 
     private void onStatsViewClick(int index) {
