@@ -15,3 +15,8 @@ Manual refresh is available, and will refresh all entries currently loaded in th
 Each tap on "Load more entries" at the bottom of the list will load an additional 200 entries from the ladder.
 
 This project is licensed under the MIT License, see the file **LICENSE** for more info.
+
+Dependencies
+------------
+
+This project makes use of the [android-numberpicker](https://github.com/SimonVT/android-numberpicker) library made by [SimonVT](https://github.com/SimonVT).
