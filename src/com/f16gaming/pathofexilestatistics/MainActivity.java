@@ -364,8 +364,6 @@ public class MainActivity extends Activity {
         }
 
         hideProgress();
-
-        statsView.setSelection(poeEntries.size() - 1);
     }
 
     private void onStatsViewClick(int index) {
