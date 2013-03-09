@@ -50,6 +50,7 @@ public class MainActivity extends Activity {
     private final String hardcoreLeague = "Hardcore";
     private final int limit = 200;
     private final int max = 15000;
+    private final int refreshWarningLimit = 4000; // Show warning if user tries to refresh more than this amount of entries
 
     private ProgressDialog progressDialog;
     private AlertDialog refreshWarningDialog;
@@ -66,7 +67,6 @@ public class MainActivity extends Activity {
 
     private ArrayList<PoeEntry> poeEntries;
     private EntryAdapter adapter;
-    private int refreshWarningLimit = 600; // Show warning if user tries to refresh more than this amount of entries
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
