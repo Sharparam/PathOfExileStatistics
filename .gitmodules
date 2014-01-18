@@ -1,0 +1,3 @@
+[submodule "android-numberpicker"]
+	path = android-numberpicker
+	url = git://github.com/SimonVT/android-numberpicker.git
