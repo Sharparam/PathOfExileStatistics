@@ -131,7 +131,7 @@ public class MainActivity extends Activity {
                          public void onClick(DialogInterface dialogInterface, int i) {
                              int rawOffset = numberPicker.getValue() - 1;
                              if (rawOffset >= limit * offset && rawOffset <= limit + limit * offset)
-                                 showToast(String.format("Rank #%d is already showing", rawOffset + 1));
+                                 showToast(String.format(getString(R.string.toast_rank_showing), rawOffset + 1));
                              else
                                  updateList(showHardcore, false, rawOffset);
                          }
@@ -269,9 +269,9 @@ public class MainActivity extends Activity {
             offset = (int) Math.floor((double) rawOffset / (double) limit);
 
         if (refresh)
-            showProgress("Refreshing", "Refreshing data (Page %d/%d)...", refreshOffset + 1, offset + 1);
+            showProgress(getString(R.string.refreshing), getString(R.string.refreshing_page), refreshOffset + 1, offset + 1);
         else
-            showProgress("Retrieving stats data...");
+            showProgress(getString(R.string.retrieving_data));
 
         // Get the league we want to load from
         String league = hardcore ? hardcoreLeague : normalLeague;
@@ -294,7 +294,7 @@ public class MainActivity extends Activity {
     private void updateList(StatsResponse response, boolean hardcore, boolean refresh, boolean jump) {
         if (response == null) {
             // Something went wrong and we didn't even get a response body
-            showToast("Failed to retrieve PoE stats data!");
+            showToast(getString(R.string.retrieve_data_fail));
             hideProgress();
             return;
         }
@@ -330,7 +330,7 @@ public class MainActivity extends Activity {
                 }
 
                 // Show a toast to the user telling them the data is updated
-                showToast(String.format("%s stats updated", hardcore ? "Hardcore" : "Normal"));
+                showToast(hardcore ? getString(R.string.hardcore_updated) : getString(R.string.normal_updated));
 
                 // Remove the "Load more entries" at bottom of list if we reached the maximum
                 if (hardcore == showHardcore && limit + limit * offset >= max)
@@ -355,12 +355,12 @@ public class MainActivity extends Activity {
                 if (Build.VERSION.SDK_INT >= 11)
                     invalidateOptionsMenu();
             } else {
-                showToast("Failed to retrieve PoE stats data!");
+                showToast(getString(R.string.retrieve_data_fail));
             }
         } catch (JSONException e) { // Invalid JSON returned
-            showToast("Error while parsing JSON data");
+            showToast(getString(R.string.json_parse_error));
         } catch (ClassCastException e) { // Usually indicative of a JSON parsing error
-            showToast("Failed to retrieve PoE stats data!");
+            showToast(getString(R.string.retrieve_data_fail));
         }
 
         hideProgress();

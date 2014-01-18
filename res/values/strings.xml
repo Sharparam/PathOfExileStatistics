@@ -57,4 +57,12 @@
     </string>
     <string name="refresh_warning_reset">Reset List</string>
     <string name="refresh_warning_confirm">Confirm Refresh</string>
+    <string name="toast_rank_showing">Rank #%d is already showing</string>
+    <string name="refreshing">Refreshing</string>
+    <string name="refreshing_page">Refreshing data (Page %1$d/%2$d)…</string>
+    <string name="retrieving_data">Retrieving stats data…</string>
+    <string name="retrieve_data_fail">Failed to retrieve PoE stats data!</string>
+    <string name="hardcore_updated">Hardcore stats updated</string>
+    <string name="normal_updated">Normal stats updated</string>
+    <string name="json_parse_error">Error while parsing JSON data</string>
 </resources>
