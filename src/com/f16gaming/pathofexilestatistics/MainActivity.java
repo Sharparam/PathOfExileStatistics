@@ -46,7 +46,7 @@ import java.util.Collections;
  */
 public class MainActivity extends Activity {
     private final String statsUrl = "http://api.pathofexile.com/leagues/%s?ladder=1&ladderOffset=%d&ladderLimit=%d";
-    private final String normalLeague = "Default";
+    private final String normalLeague = "Standard";
     private final String hardcoreLeague = "Hardcore";
     private final int limit = 200;
     private final int max = 15000;
